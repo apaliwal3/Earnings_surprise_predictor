@@ -1,0 +1,63 @@
+# Stage 1 skeleton: define the pipeline DAG here.
+# TODO: replace placeholder commands with the real module entry points as each stage is implemented.
+
+vars:
+  - params.yaml
+
+stages:
+  download_filings:
+    cmd: python -m src.data.download_filings
+    deps:
+      - src/data/download_filings.py
+    outs:
+      - data/raw/filings/
+    params:
+      - data.start_date
+      - data.end_date
+
+  download_prices:
+    cmd: python -m src.data.download_prices
+    deps:
+      - src/data/download_prices.py
+    outs:
+      - data/raw/prices/
+    params:
+      - data.start_date
+      - data.end_date
+
+  validate:
+    cmd: python -m src.data.validate
+    deps:
+      - src/data/validate.py
+      - data/raw/filings/
+      - data/raw/prices/
+    outs:
+      - data/processed/
+
+  features:
+    cmd: python -m src.features.fuse
+    deps:
+      - src/features/tabular.py
+      - src/features/text_embeddings.py
+      - src/features/fuse.py
+      - data/raw/filings/
+      - data/raw/prices/
+    outs:
+      - data/processed/features.parquet
+
+  train:
+    cmd: python -m src.models.train
+    deps:
+      - src/models/train.py
+      - data/processed/features.parquet
+    params:
+      - model
+      - train
+
+  evaluate:
+    cmd: python -m src.models.evaluate
+    deps:
+      - src/models/evaluate.py
+      - data/processed/features.parquet
+    params:
+      - eval

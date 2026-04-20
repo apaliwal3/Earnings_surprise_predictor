@@ -1,0 +1,26 @@
+# Stage 1 skeleton: keep all tunable values here.
+# TODO: replace placeholder values with the exact training and evaluation settings you want.
+
+data:
+  start_date: "2015-01-01"
+  end_date: "2024-12-31"
+  label_threshold: 0.02
+
+text:
+  batch_size: 32
+  max_length: 512
+
+model:
+  num_leaves: 31
+  learning_rate: 0.05
+  n_estimators: 300
+  max_depth: -1
+  subsample: 0.8
+  colsample_bytree: 0.8
+
+train:
+  test_size: 0.2
+  random_state: 42
+
+eval:
+  recall_gate: 0.55

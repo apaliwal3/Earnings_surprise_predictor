@@ -1,0 +1,7 @@
+# Keep DVC from wasting time on local/editor noise.
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
