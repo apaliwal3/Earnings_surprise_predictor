@@ -31,8 +31,6 @@ stages:
       - src/data/validate.py
       - data/raw/filings/
       - data/raw/prices/
-    outs:
-      - data/processed/
 
   features:
     cmd: python -m src.features.fuse

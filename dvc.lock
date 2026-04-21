@@ -1,0 +1,36 @@
+schema: '2.0'
+stages:
+  download_filings:
+    cmd: python -m src.data.download_filings
+    deps:
+    - path: src/data/download_filings.py
+      hash: md5
+      md5: c31e401b23fc5e199ed6c782c5d72c93
+      size: 5460
+    params:
+      params.yaml:
+        data.end_date: '2024-12-31'
+        data.start_date: '2015-01-01'
+    outs:
+    - path: data/raw/filings/
+      hash: md5
+      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
+      size: 401754534244
+      nfiles: 28444
+  download_prices:
+    cmd: python -m src.data.download_prices
+    deps:
+    - path: src/data/download_prices.py
+      hash: md5
+      md5: db8492fa093cdc74a7d7798977c25476
+      size: 5670
+    params:
+      params.yaml:
+        data.end_date: '2024-12-31'
+        data.start_date: '2015-01-01'
+    outs:
+    - path: data/raw/prices/
+      hash: md5
+      md5: 11dc124ffba9762c87d50c2feaf83900.dir
+      size: 149845981
+      nfiles: 501
