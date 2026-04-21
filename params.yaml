@@ -1,5 +1,4 @@
 # Stage 1 skeleton: keep all tunable values here.
-# TODO: replace placeholder values with the exact training and evaluation settings you want.
 
 data:
   start_date: "2015-01-01"
