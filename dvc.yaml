@@ -6,7 +6,7 @@ vars:
 
 stages:
   download_filings:
-    cmd: python -m src.data.download_filings
+    cmd: .venv/bin/python -m src.data.download_filings
     deps:
       - src/data/download_filings.py
     outs:
@@ -16,7 +16,7 @@ stages:
       - data.end_date
 
   download_prices:
-    cmd: python -m src.data.download_prices
+    cmd: .venv/bin/python -m src.data.download_prices
     deps:
       - src/data/download_prices.py
     outs:
@@ -26,14 +26,14 @@ stages:
       - data.end_date
 
   validate:
-    cmd: python -m src.data.validate
+    cmd: .venv/bin/python -m src.data.validate
     deps:
       - src/data/validate.py
       - data/raw/filings/
       - data/raw/prices/
 
   features:
-    cmd: python -m src.features.fuse
+    cmd: .venv/bin/python -m src.features.fuse
     deps:
       - src/features/tabular.py
       - src/features/text_embeddings.py
@@ -44,7 +44,7 @@ stages:
       - data/processed/features.parquet
 
   train:
-    cmd: python -m src.models.train
+    cmd: .venv/bin/python -m src.models.train
     deps:
       - src/models/train.py
       - data/processed/features.parquet
@@ -53,7 +53,7 @@ stages:
       - train
 
   evaluate:
-    cmd: python -m src.models.evaluate
+    cmd: .venv/bin/python -m src.models.evaluate
     deps:
       - src/models/evaluate.py
       - data/processed/features.parquet
