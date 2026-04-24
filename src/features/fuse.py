@@ -131,7 +131,7 @@ def merge_features_and_labels(tabular_df: pd.DataFrame, embeddings_df: pd.DataFr
     return merged
 
 
-def fuse_features(output_dir: str = "data/processed", device: str = "cpu") -> None:
+def fuse_features(output_dir: str = "data/processed", device: str = "mps") -> None:
     """
     End-to-end: generate tabular, generate embeddings, merge, compute labels, write parquet.
     
@@ -165,4 +165,4 @@ def fuse_features(output_dir: str = "data/processed", device: str = "cpu") -> No
 
 
 if __name__ == "__main__":
-    fuse_features(device="cpu")  # or "mps" for Apple Silicon
+    fuse_features(device="mps")  # or "mps" for Apple Silicon

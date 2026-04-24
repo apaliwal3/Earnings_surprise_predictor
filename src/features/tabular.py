@@ -175,9 +175,13 @@ def compute_quarterly_features(prices_df: pd.DataFrame, ticker: str) -> list:
     return results
 
 
-def generate_tabular_features(data_dir: str = "data/raw/prices") -> pd.DataFrame:
+def generate_tabular_features(data_dir: str = "data/raw/prices", device: str = "mps") -> pd.DataFrame:
     """
     Load all price data, compute quarterly features for each ticker, return merged DataFrame.
+
+    Note:
+        Tabular feature engineering is pandas-based and CPU-bound. The `device`
+        argument is kept for consistency with other Stage 4 modules.
     
     Returns:
         pd.DataFrame: columns [ticker, quarter, feature_1, ..., feature_25]

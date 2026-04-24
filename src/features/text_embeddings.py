@@ -14,6 +14,13 @@ from transformers import AutoTokenizer, AutoModel
 from src.data.download_prices import load_sp500_tickers as local_sp500_tickers
 
 
+def resolve_device(device: str = "mps") -> str:
+    """Resolve device preference, falling back to CPU when MPS is unavailable."""
+    if device == "mps" and not torch.backends.mps.is_available():
+        return "cpu"
+    return device
+
+
 def load_local_sp500_tickers() -> list:
     """
     Load S&P 500 ticker list (fallback to hardcoded list if needed).
@@ -56,7 +63,7 @@ def extract_mda_text(filing_text: str) -> str:
     return re.sub(r"\s+", " ", filing_text[:8000]).strip()
 
 
-def load_finbert_model(device: str = "cpu"):
+def load_finbert_model(device: str = "mps"):
     """
     Load FinBERT tokenizer and model.
     
@@ -66,8 +73,7 @@ def load_finbert_model(device: str = "cpu"):
     Returns:
         (tokenizer, model)
     """
-    if device == "mps" and not torch.backends.mps.is_available():
-        device = "cpu"
+    device = resolve_device(device)
 
     tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
     model = AutoModel.from_pretrained("ProsusAI/finbert")
@@ -76,7 +82,7 @@ def load_finbert_model(device: str = "cpu"):
     return tokenizer, model
 
 
-def get_embedding_for_text(text: str, tokenizer, model, device: str = "cpu", max_length: int = 512) -> np.ndarray:
+def get_embedding_for_text(text: str, tokenizer, model, device: str = "mps", max_length: int = 512) -> np.ndarray:
     """
     Given text, tokenize, get [CLS] token embedding (768-dim).
     
@@ -90,6 +96,7 @@ def get_embedding_for_text(text: str, tokenizer, model, device: str = "cpu", max
     Returns:
         np.ndarray: 768-dimensional embedding
     """
+    device = resolve_device(device)
     hidden_size = getattr(model.config, "hidden_size", 768)
     if not text:
         return np.zeros(hidden_size, dtype=np.float32)
@@ -136,7 +143,7 @@ def extract_quarter_from_filename(filename: str) -> str:
     return f"{int(filing_date.year)}Q{quarter}"
 
 
-def generate_text_embeddings(data_dir: str = "data/raw/filings", device: str = "cpu") -> pd.DataFrame:
+def generate_text_embeddings(data_dir: str = "data/raw/filings", device: str = "mps") -> pd.DataFrame:
     """
     Process all 10-Q filings, extract MD&A, generate embeddings.
     
@@ -147,6 +154,7 @@ def generate_text_embeddings(data_dir: str = "data/raw/filings", device: str = "
     Returns:
         pd.DataFrame: columns [ticker, quarter, embedding_0, ..., embedding_767]
     """
+    device = resolve_device(device)
     filings_path = Path(data_dir)
     if not filings_path.exists():
         return pd.DataFrame(columns=["ticker", "quarter"])
@@ -186,6 +194,6 @@ def generate_text_embeddings(data_dir: str = "data/raw/filings", device: str = "
 
 
 if __name__ == "__main__":
-    embeddings_df = generate_text_embeddings(device="cpu")  # or "mps" for Apple Silicon
+    embeddings_df = generate_text_embeddings(device="mps")  # or "mps" for Apple Silicon
     print(f"Generated embeddings: {embeddings_df.shape}")
     print(embeddings_df.head())

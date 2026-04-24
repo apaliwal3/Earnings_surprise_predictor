@@ -8,3 +8,7 @@ __pycache__/
 data/raw/filings/
 data/raw/prices/
 data/processed/
+
+# MLflow experiment tracking (local, not version controlled)
+mlruns/
+mlflow.db
