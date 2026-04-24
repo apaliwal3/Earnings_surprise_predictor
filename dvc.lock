@@ -1,7 +1,7 @@
 schema: '2.0'
 stages:
   download_filings:
-    cmd: python -m src.data.download_filings
+    cmd: .venv/bin/python -m src.data.download_filings
     deps:
     - path: src/data/download_filings.py
       hash: md5
@@ -18,7 +18,7 @@ stages:
       size: 401754534244
       nfiles: 28444
   download_prices:
-    cmd: python -m src.data.download_prices
+    cmd: .venv/bin/python -m src.data.download_prices
     deps:
     - path: src/data/download_prices.py
       hash: md5
@@ -34,3 +34,73 @@ stages:
       md5: 11dc124ffba9762c87d50c2feaf83900.dir
       size: 149845981
       nfiles: 501
+  validate:
+    cmd: .venv/bin/python -m src.data.validate
+    deps:
+    - path: data/raw/filings/
+      hash: md5
+      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
+      size: 401754534244
+      nfiles: 28444
+    - path: data/raw/prices/
+      hash: md5
+      md5: 11dc124ffba9762c87d50c2feaf83900.dir
+      size: 149845981
+      nfiles: 501
+    - path: src/data/validate.py
+      hash: md5
+      md5: f92e4b4b7edc31236995f89f04473a89
+      size: 6425
+  features:
+    cmd: .venv/bin/python -m src.features.fuse
+    deps:
+    - path: data/raw/filings/
+      hash: md5
+      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
+      size: 401754534244
+      nfiles: 28444
+    - path: data/raw/prices/
+      hash: md5
+      md5: 11dc124ffba9762c87d50c2feaf83900.dir
+      size: 149845981
+      nfiles: 501
+    - path: src/features/fuse.py
+      hash: md5
+      md5: 50cb9f103b008b2cd0169ef95268fc3c
+      size: 5850
+    - path: src/features/tabular.py
+      hash: md5
+      md5: 673135f18aeef998a9b9b992fb60e428
+      size: 8173
+    - path: src/features/text_embeddings.py
+      hash: md5
+      md5: 1d3f33213f643fec689f02015c055932
+      size: 5941
+    outs:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 74d86ad07054cb71f078cc5013d31d62
+      size: 81292341
+  train:
+    cmd: .venv/bin/python -m src.models.train
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 74d86ad07054cb71f078cc5013d31d62
+      size: 81292341
+    - path: src/models/train.py
+      hash: md5
+      md5: c07e648abdd00dae24001670aaacf52e
+      size: 4069
+    params:
+      params.yaml:
+        model:
+          num_leaves: 31
+          learning_rate: 0.05
+          n_estimators: 300
+          max_depth: -1
+          subsample: 0.8
+          colsample_bytree: 0.8
+        train:
+          test_size: 0.2
+          random_state: 42
