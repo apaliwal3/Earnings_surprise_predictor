@@ -51,3 +51,17 @@ stages:
     params:
       - model
       - train
+
+  evaluate:
+    cmd: .venv/bin/python -m src.models.evaluate
+    deps:
+      - src/models/evaluate.py
+      - src/models/train.py
+      - data/processed/features.parquet
+    params:
+      - model
+      - train
+      - eval
+    outs:
+      - data/processed/eval_metrics.json
+      - data/processed/eval_predictions.parquet

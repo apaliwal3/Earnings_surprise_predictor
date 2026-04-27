@@ -104,3 +104,41 @@ stages:
         train:
           test_size: 0.2
           random_state: 42
+  evaluate:
+    cmd: .venv/bin/python -m src.models.evaluate
+    deps:
+    - path: data/processed/features.parquet
+      hash: md5
+      md5: 74d86ad07054cb71f078cc5013d31d62
+      size: 81292341
+    - path: src/models/evaluate.py
+      hash: md5
+      md5: b06fdb1c408e50361a77e68b9d6de269
+      size: 4608
+    - path: src/models/train.py
+      hash: md5
+      md5: c07e648abdd00dae24001670aaacf52e
+      size: 4069
+    params:
+      params.yaml:
+        eval:
+          recall_gate: 0.55
+        model:
+          num_leaves: 31
+          learning_rate: 0.05
+          n_estimators: 300
+          max_depth: -1
+          subsample: 0.8
+          colsample_bytree: 0.8
+        train:
+          test_size: 0.2
+          random_state: 42
+    outs:
+    - path: data/processed/eval_metrics.json
+      hash: md5
+      md5: fabc82688643b55d1da62acee0b374f9
+      size: 319
+    - path: data/processed/eval_predictions.parquet
+      hash: md5
+      md5: f6307f0b7c695a759bcc48ac5e6c7762
+      size: 30156
