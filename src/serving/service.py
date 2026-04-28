@@ -11,6 +11,8 @@ import mlflow.lightgbm
 import pandas as pd
 import yaml
 
+from src.serving.forecast_inputs import ForecastMode, ResolvedForecastInput, load_features_dataframe, resolve_feature_input
+
 
 @dataclass(frozen=True)
 class ServeConfig:
@@ -34,6 +36,21 @@ class ModelBundle:
 class PredictionResult:
     """Single prediction response payload."""
 
+    probability: float
+    prediction: int
+    threshold_used: float
+    run_id: str | None
+    feature_count: int
+
+
+@dataclass(frozen=True)
+class ForecastPredictionResult:
+    """Prediction payload for ticker/quarter requests."""
+
+    ticker: str
+    target_quarter: str
+    as_of_quarter: str
+    forecast_mode: ForecastMode
     probability: float
     prediction: int
     threshold_used: float
@@ -112,6 +129,12 @@ def get_model_bundle() -> ModelBundle:
     return load_model_bundle()
 
 
+@lru_cache(maxsize=1)
+def get_features_dataframe() -> pd.DataFrame:
+    """Cache the fused feature table for quarter-aware serving."""
+    return load_features_dataframe()
+
+
 def _align_features(feature_values: Mapping[str, float], feature_names: list[str]) -> pd.DataFrame:
     """Align caller-provided features to the model's expected column order."""
     frame = pd.DataFrame([feature_values], dtype=float)
@@ -142,4 +165,41 @@ def predict_with_threshold(
         threshold_used=threshold,
         run_id=bundle.run_id,
         feature_count=len(bundle.feature_names),
+    )
+
+
+def predict_from_ticker_quarter(
+    ticker: str,
+    quarter: str | None = None,
+    forecast_mode: ForecastMode = "next",
+    min_confidence: float | None = None,
+    bundle: ModelBundle | None = None,
+    default_threshold: float = 0.5,
+) -> ForecastPredictionResult:
+    """Resolve a ticker/quarter request into features and score it."""
+    bundle = bundle or get_model_bundle()
+    resolved: ResolvedForecastInput = resolve_feature_input(
+        get_features_dataframe(),
+        ticker=ticker,
+        quarter=quarter,
+        forecast_mode=forecast_mode,
+    )
+
+    prediction = predict_with_threshold(
+        feature_values=resolved.features,
+        min_confidence=min_confidence,
+        bundle=bundle,
+        default_threshold=default_threshold,
+    )
+
+    return ForecastPredictionResult(
+        ticker=resolved.ticker,
+        target_quarter=resolved.target_quarter,
+        as_of_quarter=resolved.as_of_quarter,
+        forecast_mode=resolved.forecast_mode,
+        probability=prediction.probability,
+        prediction=prediction.prediction,
+        threshold_used=prediction.threshold_used,
+        run_id=prediction.run_id,
+        feature_count=prediction.feature_count,
     )
