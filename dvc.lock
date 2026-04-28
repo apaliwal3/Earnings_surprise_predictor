@@ -5,8 +5,8 @@ stages:
     deps:
     - path: src/data/download_filings.py
       hash: md5
-      md5: c31e401b23fc5e199ed6c782c5d72c93
-      size: 5460
+      md5: b49ebc3a9b3d3e3c38e41f3f6b809bba
+      size: 6248
     params:
       params.yaml:
         data.end_date: '2024-12-31'
@@ -14,16 +14,16 @@ stages:
     outs:
     - path: data/raw/filings/
       hash: md5
-      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
-      size: 401754534244
-      nfiles: 28444
+      md5: 410574cf3987db1be3a3608223eebb34.dir
+      size: 447803748837
+      nfiles: 31832
   download_prices:
     cmd: .venv/bin/python -m src.data.download_prices
     deps:
     - path: src/data/download_prices.py
       hash: md5
-      md5: db8492fa093cdc74a7d7798977c25476
-      size: 5670
+      md5: 033f74b60e4ddb0f00c2fd701fe03017
+      size: 6519
     params:
       params.yaml:
         data.end_date: '2024-12-31'
@@ -31,22 +31,22 @@ stages:
     outs:
     - path: data/raw/prices/
       hash: md5
-      md5: 11dc124ffba9762c87d50c2feaf83900.dir
-      size: 149845981
-      nfiles: 501
+      md5: 4dc4604a35b97b94ef1f27de315ff3a7.dir
+      size: 170088578
+      nfiles: 503
   validate:
     cmd: .venv/bin/python -m src.data.validate
     deps:
     - path: data/raw/filings/
       hash: md5
-      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
-      size: 401754534244
-      nfiles: 28444
+      md5: 410574cf3987db1be3a3608223eebb34.dir
+      size: 447803748837
+      nfiles: 31832
     - path: data/raw/prices/
       hash: md5
-      md5: 11dc124ffba9762c87d50c2feaf83900.dir
-      size: 149845981
-      nfiles: 501
+      md5: 4dc4604a35b97b94ef1f27de315ff3a7.dir
+      size: 170088578
+      nfiles: 503
     - path: src/data/validate.py
       hash: md5
       md5: f92e4b4b7edc31236995f89f04473a89
@@ -56,14 +56,14 @@ stages:
     deps:
     - path: data/raw/filings/
       hash: md5
-      md5: 814a674d9d0d0503a1cc5e094f7a106b.dir
-      size: 401754534244
-      nfiles: 28444
+      md5: 410574cf3987db1be3a3608223eebb34.dir
+      size: 447803748837
+      nfiles: 31832
     - path: data/raw/prices/
       hash: md5
-      md5: 11dc124ffba9762c87d50c2feaf83900.dir
-      size: 149845981
-      nfiles: 501
+      md5: 4dc4604a35b97b94ef1f27de315ff3a7.dir
+      size: 170088578
+      nfiles: 503
     - path: src/features/fuse.py
       hash: md5
       md5: 50cb9f103b008b2cd0169ef95268fc3c
@@ -79,15 +79,15 @@ stages:
     outs:
     - path: data/processed/features.parquet
       hash: md5
-      md5: 74d86ad07054cb71f078cc5013d31d62
-      size: 81292341
+      md5: 1c89894adce3ac06b86efb462f13fbde
+      size: 90847146
   train:
     cmd: .venv/bin/python -m src.models.train
     deps:
     - path: data/processed/features.parquet
       hash: md5
-      md5: 74d86ad07054cb71f078cc5013d31d62
-      size: 81292341
+      md5: 1c89894adce3ac06b86efb462f13fbde
+      size: 90847146
     - path: src/models/train.py
       hash: md5
       md5: c07e648abdd00dae24001670aaacf52e
@@ -109,8 +109,8 @@ stages:
     deps:
     - path: data/processed/features.parquet
       hash: md5
-      md5: 74d86ad07054cb71f078cc5013d31d62
-      size: 81292341
+      md5: 1c89894adce3ac06b86efb462f13fbde
+      size: 90847146
     - path: src/models/evaluate.py
       hash: md5
       md5: b06fdb1c408e50361a77e68b9d6de269
@@ -136,9 +136,9 @@ stages:
     outs:
     - path: data/processed/eval_metrics.json
       hash: md5
-      md5: fabc82688643b55d1da62acee0b374f9
-      size: 319
+      md5: 98d829de80a5d78940ac52261cb067f7
+      size: 318
     - path: data/processed/eval_predictions.parquet
       hash: md5
-      md5: f6307f0b7c695a759bcc48ac5e6c7762
-      size: 30156
+      md5: 4730b32db80c1dae4afcb34316a993ed
+      size: 33481
