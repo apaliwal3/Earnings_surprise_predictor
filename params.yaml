@@ -23,3 +23,7 @@ train:
 
 eval:
   recall_gate: 0.55
+
+serve:
+  experiment_name: "earnings-surprise-predictor"
+  decision_threshold: 0.5

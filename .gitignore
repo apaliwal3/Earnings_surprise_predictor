@@ -3,6 +3,7 @@
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
+data/**/.DS_Store
 
 # Generated data/artifacts are tracked via DVC, not git.
 data/raw/filings/
