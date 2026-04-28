@@ -3,7 +3,10 @@
 
 from __future__ import annotations
 
+import argparse
+import datetime
 import logging
+import os
 from pathlib import Path
 from typing import Iterable
 
@@ -157,9 +160,24 @@ def main() -> None:
         format="%(asctime)s | %(levelname)s | %(message)s",
     )
 
-    params = load_params()
-    start_date = params["data"]["start_date"]
-    end_date = params["data"]["end_date"]
+    parser = argparse.ArgumentParser(
+        prog="download_prices",
+        description="Download historical prices and earnings dates for tickers.",
+    )
+    parser.add_argument("--params", default="params.yaml", help="Path to params.yaml")
+    parser.add_argument("--start-date", dest="start_date", help="Override start date (YYYY-MM-DD)")
+    parser.add_argument("--end-date", dest="end_date", help="Override end date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    params = load_params(args.params)
+
+    # Resolve start/end date precedence: CLI args > CI env vars > params.yaml
+    start_date = args.start_date or os.getenv("CI_START_DATE") or params["data"]["start_date"]
+    end_date = args.end_date or os.getenv("CI_END_DATE") or params["data"]["end_date"]
+
+    # If end_date is empty string or None, default to today's date
+    if end_date in (None, ""):
+        end_date = datetime.date.today().isoformat()
 
     out = output_dir()
     out.mkdir(parents=True, exist_ok=True)
