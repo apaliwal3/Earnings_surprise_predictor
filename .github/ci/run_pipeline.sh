@@ -65,6 +65,24 @@ else
   echo "Evaluate module not found; skipping"
 fi
 
+# 5a) Check recall gate from eval metrics
+if [ -f data/processed/eval_metrics.json ]; then
+  echo "Checking recall gate..."
+  passes_gate=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(int(m['passes_recall_gate']))")
+  recall=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall']:.4f}\")")
+  gate_threshold=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall_gate']:.4f}\")")
+  
+  echo "Recall: $recall, Gate threshold: $gate_threshold"
+  
+  if [ "$passes_gate" = "0" ]; then
+    echo "ERROR: Recall $recall is below gate threshold $gate_threshold"
+    exit 1
+  fi
+  echo "✓ Recall gate passed"
+else
+  echo "WARNING: eval_metrics.json not found; skipping recall gate check"
+fi
+
 # 6) Configure DVC remote if provided and push artifacts
 if [ -n "${DVC_REMOTE_URL-}" ]; then
   if ! dvc remote list | awk '{print $1}' | grep -qx "ci"; then
