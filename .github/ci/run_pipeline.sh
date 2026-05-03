@@ -6,6 +6,8 @@ set -euo pipefail
 
 echo "Starting retrain pipeline"
 
+PYTHON_BIN="${PYTHON_BIN:-python}"
+
 # If CI_END_DATE is empty, default to today's date
 if [ -z "${CI_END_DATE-}" ]; then
   CI_END_DATE=$(date -u +%F)
@@ -23,44 +25,44 @@ fi
 # 1) Download latest filings (assumes src/data/download_filings.py has CLI or module behavior)
 if [ -f src/data/download_filings.py ]; then
   echo "Downloading filings..."
-  python -m src.data.download_filings --end-date "$CI_END_DATE" || true
+  "$PYTHON_BIN" -m src.data.download_filings --end-date "$CI_END_DATE" || true
 fi
 
 # 2) Download prices with the CI_END_DATE override
 if [ -f src/data/download_prices.py ]; then
   echo "Downloading prices..."
-  python -m src.data.download_prices --end-date "$CI_END_DATE"
+  "$PYTHON_BIN" -m src.data.download_prices --end-date "$CI_END_DATE"
 fi
 
 # 3) Run feature fusion
-if python -c "import importlib.util,sys
+if "$PYTHON_BIN" -c "import importlib.util,sys
 spec = importlib.util.find_spec('src.features.fuse')
 if spec is None: sys.exit(2)
 "; then
   echo "Running feature fusion..."
-  python -m src.features.fuse
+  "$PYTHON_BIN" -m src.features.fuse
 else
   echo "Feature fusion module not found; skipping"
 fi
 
 # 4) Train model
-if python -c "import importlib.util,sys
+if "$PYTHON_BIN" -c "import importlib.util,sys
 spec = importlib.util.find_spec('src.models.train')
 if spec is None: sys.exit(2)
 "; then
   echo "Training model..."
-  python -m src.models.train
+  "$PYTHON_BIN" -m src.models.train
 else
   echo "Training module not found; skipping"
 fi
 
 # 5) Evaluate model
-if python -c "import importlib.util,sys
+if "$PYTHON_BIN" -c "import importlib.util,sys
 spec = importlib.util.find_spec('src.models.evaluate')
 if spec is None: sys.exit(2)
 "; then
   echo "Evaluating model..."
-  python -m src.models.evaluate
+  "$PYTHON_BIN" -m src.models.evaluate
 else
   echo "Evaluate module not found; skipping"
 fi
@@ -68,9 +70,9 @@ fi
 # 5a) Check recall gate from eval metrics
 if [ -f data/processed/eval_metrics.json ]; then
   echo "Checking recall gate..."
-  passes_gate=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(int(m['passes_recall_gate']))")
-  recall=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall']:.4f}\")")
-  gate_threshold=$(.venv/bin/python -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall_gate']:.4f}\")")
+  passes_gate=$("$PYTHON_BIN" -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(int(m['passes_recall_gate']))")
+  recall=$("$PYTHON_BIN" -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall']:.4f}\")")
+  gate_threshold=$("$PYTHON_BIN" -c "import json; m=json.load(open('data/processed/eval_metrics.json')); print(f\"{m['recall_gate']:.4f}\")")
   
   echo "Recall: $recall, Gate threshold: $gate_threshold"
   
