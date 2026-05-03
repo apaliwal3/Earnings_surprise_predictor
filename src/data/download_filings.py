@@ -69,7 +69,7 @@ def load_sp500_tickers() -> Iterable[str]:
             headers=WIKI_HEADERS,
         )
         response.raise_for_status()
-        table = pd.read_html(StringIO(response.text))[0]
+        table = pd.read_html(StringIO(response.text), flavor="lxml")[0]
         symbols = table["Symbol"].astype(str).tolist()
         normalized = sorted({normalize_ticker(symbol) for symbol in symbols})
         LOGGER.info("Loaded %d S&P 500 tickers from Wikipedia", len(normalized))
