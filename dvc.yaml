@@ -51,6 +51,8 @@ stages:
     params:
       - model
       - train
+    outs:
+      - mlruns/
 
   evaluate:
     cmd: .venv/bin/python -m src.models.evaluate
